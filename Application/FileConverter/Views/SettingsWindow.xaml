@@ -357,12 +357,13 @@
 
             <!-- Application settings -->
             <TabItem Header="{x:Static project:Resources.Application}">
-                <Grid Margin="5">
+                <Grid Margin="6">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -399,6 +400,9 @@
 
                     <Label Grid.Row="5" Grid.Column="0" Content="{x:Static project:Resources.CopyFilesInClipboardAfterConversion}" HorizontalAlignment="Right" Margin="0,0,5,0"/>
                     <CheckBox Grid.Row="5" Grid.Column="1" x:Name="CopyFilesInClipboardAfterConversionCheckBox" IsChecked="{Binding Settings.CopyFilesInClipboardAfterConversion, Mode=TwoWay}"  Margin="0,5,0,5" />
+
+                    <Label Grid.Row="6" Grid.Column="0" Content="{x:Static project:Resources.ContinueProcessingWithSkipErrors}" HorizontalAlignment="Right" Margin="0,0,5,0"/>
+                    <CheckBox Grid.Row="6" Grid.Column="1" x:Name="ContinueProcessingWithSkipErrorsCheckBox" IsChecked="{Binding Settings.ContinueProcessingWithSkipErrors, Mode=TwoWay}"  Margin="0,5,0,5" />
                 </Grid>
             </TabItem>
 

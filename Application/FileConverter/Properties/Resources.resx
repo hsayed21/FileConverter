@@ -592,4 +592,7 @@ use maj for uppercase version</value>
   <data name="CopyFilesInClipboardAfterConversion" xml:space="preserve">
     <value>Copy files in clipboard after conversion</value>
   </data>
+  <data name="ContinueProcessingWithSkipErrors" xml:space="preserve">
+    <value>Continue Processing With Skip Errors</value>
+  </data>
 </root>

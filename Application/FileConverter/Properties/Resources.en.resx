@@ -574,4 +574,7 @@ use maj for uppercase version</value>
   <data name="ErrorCantLoadSettings" xml:space="preserve">
     <value>Can't load file converter user settings. Do you want to fall back to default settings ?</value>
   </data>
+  <data name="ContinueProcessingWithSkipErrors" xml:space="preserve">
+    <value>Continue Processing With Skip Errors</value>
+  </data>
 </root>

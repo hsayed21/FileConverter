@@ -22,6 +22,7 @@ namespace FileConverter
         private CultureInfo applicationLanguage;
         private int maximumNumberOfSimultaneousConversions;
         private bool copyFilesInClipboardAfterConversion = false;
+        private bool continueProcessingWithSkipErrors = false;
 
         public ConversionPreset GetPresetFromName(string presetName)
         {
@@ -218,6 +219,21 @@ namespace FileConverter
             set
             {
                 this.copyFilesInClipboardAfterConversion = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+        [XmlElement]
+        public bool ContinueProcessingWithSkipErrors
+        {
+            get
+            {
+                return this.continueProcessingWithSkipErrors;
+            }
+
+            set
+            {
+                this.continueProcessingWithSkipErrors = value;
                 this.OnPropertyChanged();
             }
         }

@@ -8,8 +8,9 @@ namespace FileConverter.ConversionJobs
     using System.Globalization;
     using System.IO;
     using System.Text.RegularExpressions;
-
+    using CommunityToolkit.Mvvm.DependencyInjection;
     using FileConverter.Controls;
+    using FileConverter.Services;
 
     public partial class ConversionJob_FFMPEG : ConversionJob
     {
@@ -23,12 +24,15 @@ namespace FileConverter.ConversionJobs
 
         private readonly List<FFMpegPass> ffmpegArgumentStringByPass = new List<FFMpegPass>();
 
+        ISettingsService SettingsService;
+
         public ConversionJob_FFMPEG() : base()
         {
         }
 
         public ConversionJob_FFMPEG(ConversionPreset conversionPreset, string inputFilePath) : base(conversionPreset, inputFilePath)
         {
+            SettingsService = Ioc.Default.GetRequiredService<ISettingsService>();
         }
 
         public static VideoEncodingSpeed[] VideoEncodingSpeeds => new[]
@@ -517,7 +521,9 @@ namespace FileConverter.ConversionJobs
                 }
                 else
                 {
-                    this.ConversionFailed(input);
+
+                    if (!this.SettingsService.Settings.ContinueProcessingWithSkipErrors)
+                        this.ConversionFailed(input);
                 }
             }
         }

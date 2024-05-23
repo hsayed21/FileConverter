@@ -214,6 +214,15 @@ namespace FileConverter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Continue Processing With Skip Errors.
+        /// </summary>
+        public static string ContinueProcessingWithSkipErrors {
+            get {
+                return ResourceManager.GetString("ContinueProcessingWithSkipErrors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Conversion Archives.
         /// </summary>
         public static string ConversionArchives {
