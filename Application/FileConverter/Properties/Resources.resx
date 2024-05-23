@@ -595,4 +595,7 @@ use maj for uppercase version</value>
   <data name="ContinueProcessingWithSkipErrors" xml:space="preserve">
     <value>Continue Processing With Skip Errors</value>
   </data>
+  <data name="HotkeyForLastDownloaded" xml:space="preserve">
+    <value>Hotkey Last Downloaded: </value>
+  </data>
 </root>

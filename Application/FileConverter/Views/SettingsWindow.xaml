@@ -135,6 +135,23 @@
                                     </TextBlock>
                                 </Grid>
 
+
+                                <!-- Hotkey Registery -->
+                                <Grid Margin="5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="2*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30"/>
+                                    </Grid.RowDefinitions>
+                                    <Label Content="{x:Static project:Resources.HotkeyForLastDownloaded}" Grid.Row="0" HorizontalContentAlignment="Right" Margin="0,0,5,0"/>
+                                    <controls:HotkeyControl 
+                                    Hotkey="{Binding SelectedPreset.HotkeyForLastDownloaded, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                    Grid.Row="0" Grid.Column="1" Margin="5,2,25,2" Width="Auto" />
+                                    
+                                </Grid>
+
                             </StackPanel>
                         </GroupBox>
 

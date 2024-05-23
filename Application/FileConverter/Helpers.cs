@@ -16,6 +16,7 @@ namespace FileConverter
 
     using Microsoft.Win32;
     using CommunityToolkit.Mvvm.DependencyInjection;
+    using System.Diagnostics;
 
     public static class Helpers
     {
@@ -348,6 +349,18 @@ namespace FileConverter
             public const string Document = "Document";
 
             public const string Misc = "Misc";
+        }
+
+        public static bool IsAnotherInstanceRunning()
+        {
+            //Check if another instance is already running
+            var currentProcess = Process.GetCurrentProcess();
+            var runningProcesses = Process.GetProcessesByName(currentProcess.ProcessName);
+            if (runningProcesses.Length > 1)
+            {
+               return true;
+            }
+            return false;
         }
     }
 }

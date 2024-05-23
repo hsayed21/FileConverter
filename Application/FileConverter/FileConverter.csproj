@@ -107,6 +107,12 @@
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.77\lib\net462\Microsoft.Xaml.Behaviors.dll</HintPath>
     </Reference>
+    <Reference Include="NHotkey, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a76ffb086700b11c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NHotkey.3.0.0\lib\net462\NHotkey.dll</HintPath>
+    </Reference>
+    <Reference Include="NHotkey.Wpf, Version=3.0.0.0, Culture=neutral, PublicKeyToken=a76ffb086700b11c, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\NHotkey.Wpf.3.0.0\lib\net462\NHotkey.Wpf.dll</HintPath>
+    </Reference>
     <Reference Include="Office, Version=12.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c">
       <HintPath>..\..\packages\Office.12.0.0\lib\net40\Office.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
@@ -169,6 +175,9 @@
     <Compile Include="ApplicationTerminateArgs.cs" />
     <Compile Include="Controls\ConversionJobControl.xaml.cs">
       <DependentUpon>ConversionJobControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\HotkeyControl.xaml.cs">
+      <DependentUpon>HotkeyControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\IconButton.cs" />
     <Compile Include="Controls\EncodingQualitySliderControl.xaml.cs">
@@ -274,6 +283,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Controls\EncodingQualitySliderControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\HotkeyControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

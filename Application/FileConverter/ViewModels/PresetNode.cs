@@ -152,6 +152,19 @@ namespace FileConverter.ViewModels
             }
         }
 
+        public string HotkeyForLastDownloaded
+        {
+            get => this.Preset.HotkeyForLastDownloaded;
+
+            set
+            {
+                this.Preset.HotkeyForLastDownloaded = value;
+                this.OnPropertyChanged();
+            }
+        }
+
+    
+
         protected override string Validate(string propertyName)
         {
             string error = base.Validate(propertyName);

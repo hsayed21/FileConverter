@@ -33,6 +33,11 @@ namespace FileConverter
     using Microsoft.Extensions.DependencyInjection;
     using Debug = FileConverter.Diagnostics.Debug;
 
+    using System.Windows.Input;
+    using NHotkey.Wpf;
+    using NHotkey;
+    using System.Linq;
+
     public partial class Application : System.Windows.Application
     {
         private static readonly Version Version = new Version()
@@ -78,17 +83,35 @@ namespace FileConverter
 
         public static void AskForShutdown()
         {
-            Application.Current.Dispatcher.BeginInvoke((Action)(() => Application.Current.Shutdown(Debug.FirstErrorCode)));
+            Application.Current.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                if (Helpers.IsAnotherInstanceRunning())
+                {
+                    Application.Current.Dispatcher.BeginInvoke((Action)(() => Application.Current.Shutdown(Debug.FirstErrorCode)));
+                }
+                else
+                {
+                    INavigationService navigationService = Ioc.Default.GetRequiredService<INavigationService>();
+                    navigationService.Close(Pages.Main, false);
+                    // Close the application if no other windows are open
+                    //if (Application.Current.Windows.Count == 0)
+                    //{
+                    //    Application.Current.Shutdown();
+                    //}
+                }
+            }));
         }
 
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+            this.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
             // Redirect standard output to the parent process in case the application is launch from command line.
             AttachConsole(ATTACH_PARENT_PROCESS);
             
             this.RegisterServices();
+            this.RegisterHotKey();
 
             this.Initialize();
 
@@ -100,6 +123,8 @@ namespace FileConverter
                 navigationService.Show(Pages.Help);
                 return;
             }
+
+            //navigationService.Show(Pages.Settings);
 
             if (this.needToRunConversionThread)
             {
@@ -123,6 +148,13 @@ namespace FileConverter
 
         protected override void OnExit(ExitEventArgs e)
         {
+            if (!Helpers.IsAnotherInstanceRunning())
+            {
+                HotkeyManager.Current.Remove("ConvertMP4CustomLower");
+                HotkeyManager.Current.Remove("ConvertMP4Lower");
+                HotkeyManager.Current.Remove("ConvertMP3");
+            }
+
             base.OnExit(e);
 
             Debug.Log("Exit application.");
@@ -208,9 +240,9 @@ namespace FileConverter
 
             INavigationService navigationService = Ioc.Default.GetRequiredService<INavigationService>();
 
-            navigationService.RegisterPage<HelpWindow>(Pages.Help, false, true);
-            navigationService.RegisterPage<MainWindow>(Pages.Main, false, true);
-            navigationService.RegisterPage<SettingsWindow>(Pages.Settings, true, true);
+            navigationService.RegisterPage<HelpWindow>(Pages.Help, false, false);
+            navigationService.RegisterPage<MainWindow>(Pages.Main, false, false);
+            navigationService.RegisterPage<SettingsWindow>(Pages.Settings, true, false);
             navigationService.RegisterPage<DiagnosticsWindow>(Pages.Diagnostics, true, false);
             navigationService.RegisterPage<UpgradeWindow>(Pages.Upgrade, true, false);
         }
@@ -493,5 +525,168 @@ namespace FileConverter
                 Application.AskForShutdown();
             }
         }
+
+        private void RegisterHotKey()
+        {
+            try
+            {
+                if (!Helpers.IsAnotherInstanceRunning())
+                {
+                    HotkeyManager.Current.AddOrReplace("ConvertMP4CustomLower", Key.F9, ModifierKeys.Control, OnConvertMP4CustomLowerHotkey);
+                    HotkeyManager.Current.AddOrReplace("ConvertMP4Lower", Key.F10, ModifierKeys.Control, OnConvertMP4LowerHotkey);
+                    HotkeyManager.Current.AddOrReplace("ConvertMP3", Key.F11, ModifierKeys.Control, OnConvertMP3Hotkey);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to register hotkey: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void OnConvertMP4LowerHotkey(object sender, HotkeyEventArgs e)
+        {
+            ConvertMP4LowerFilesInDownloadFolder();
+            e.Handled = true;
+        }
+        private void OnConvertMP4CustomLowerHotkey(object sender, HotkeyEventArgs e)
+        {
+            ConvertMP4CustomLowerFilesInDownloadFolder();
+            e.Handled = true;
+        }
+
+        private void OnConvertMP3Hotkey(object sender, HotkeyEventArgs e)
+        {
+            ConvertMP3FilesInDownloadFolder();
+            e.Handled = true;
+        }
+
+        private void ConvertMP4LowerFilesInDownloadFolder()
+        {
+            string downloadFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+            string[] mp4Files = Directory.GetFiles(downloadFolderPath, "*.mp4");
+            // get last Date modified file
+            FileInfo lastFile = mp4Files.Select(f => new FileInfo(f)).OrderByDescending(f => f.LastWriteTime).First();
+
+            if (mp4Files.Length == 0)
+            {
+                MessageBox.Show("No MP4 files found in the download folder.", "File Converter", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            ISettingsService settingsService = Ioc.Default.GetRequiredService<ISettingsService>();
+            ConversionPreset conversionPreset = settingsService.Settings.GetPresetFromName("To Mp4 (low quality)");
+
+            if (conversionPreset == null)
+            {
+                MessageBox.Show("Invalid conversion preset.", "File Converter", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            IConversionService conversionService = Ioc.Default.GetRequiredService<IConversionService>();
+
+            //foreach (string mp4File in mp4Files)
+            //{
+            //    ConversionJob conversionJob = ConversionJobFactory.Create(conversionPreset, mp4File);
+            //    conversionService.RegisterConversionJob(conversionJob);
+            //}
+
+            ConversionJob conversionJob = ConversionJobFactory.Create(conversionPreset, lastFile.FullName);
+            conversionService.RegisterConversionJob(conversionJob);
+
+            // Navigate to the wanted view.
+            INavigationService navigationService = Ioc.Default.GetRequiredService<INavigationService>();
+            navigationService.Show(Pages.Main);
+
+            conversionService.ConversionJobsTerminated += this.ConversionService_ConversionJobsTerminated;
+            //conversionService.Conver();
+            conversionService.ConvertFilesAsync();
+
+        }
+        private void ConvertMP4CustomLowerFilesInDownloadFolder()
+        {
+            string downloadFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+            string[] mp4Files = Directory.GetFiles(downloadFolderPath, "*.mp4");
+            // get last Date modified file
+            FileInfo lastFile = mp4Files.Select(f => new FileInfo(f)).OrderByDescending(f => f.LastWriteTime).First();
+
+            if (mp4Files.Length == 0)
+            {
+                MessageBox.Show("No MP4 files found in the download folder.", "File Converter", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            ISettingsService settingsService = Ioc.Default.GetRequiredService<ISettingsService>();
+            ConversionPreset conversionPreset = settingsService.Settings.GetPresetFromName("To Mp4 (low quality custom)");
+
+            if (conversionPreset == null)
+            {
+                MessageBox.Show("Invalid conversion preset.", "File Converter", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            IConversionService conversionService = Ioc.Default.GetRequiredService<IConversionService>();
+
+            //foreach (string mp4File in mp4Files)
+            //{
+            //    ConversionJob conversionJob = ConversionJobFactory.Create(conversionPreset, mp4File);
+            //    conversionService.RegisterConversionJob(conversionJob);
+            //}
+
+            ConversionJob conversionJob = ConversionJobFactory.Create(conversionPreset, lastFile.FullName);
+            conversionService.RegisterConversionJob(conversionJob);
+
+            // Navigate to the wanted view.
+            INavigationService navigationService = Ioc.Default.GetRequiredService<INavigationService>();
+            navigationService.Show(Pages.Main);
+
+            conversionService.ConversionJobsTerminated += this.ConversionService_ConversionJobsTerminated;
+            //conversionService.Conver();
+            conversionService.ConvertFilesAsync();
+
+        }
+
+        private void ConvertMP3FilesInDownloadFolder()
+        {
+            string downloadFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+            string[] mp4Files = Directory.GetFiles(downloadFolderPath, "*.ogg");
+            // get last Date modified file
+            FileInfo lastFile = mp4Files.Select(f => new FileInfo(f)).OrderByDescending(f => f.LastWriteTime).First();
+
+            if (mp4Files.Length == 0)
+            {
+                MessageBox.Show("No ogg files found in the download folder.", "File Converter", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            ISettingsService settingsService = Ioc.Default.GetRequiredService<ISettingsService>();
+            ConversionPreset conversionPreset = settingsService.Settings.GetPresetFromName("To Mp3");
+
+            if (conversionPreset == null)
+            {
+                MessageBox.Show("Invalid conversion preset.", "File Converter", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            IConversionService conversionService = Ioc.Default.GetRequiredService<IConversionService>();
+
+            //foreach (string mp4File in mp4Files)
+            //{
+            //    ConversionJob conversionJob = ConversionJobFactory.Create(conversionPreset, mp4File);
+            //    conversionService.RegisterConversionJob(conversionJob);
+            //}
+
+            ConversionJob conversionJob = ConversionJobFactory.Create(conversionPreset, lastFile.FullName);
+            conversionService.RegisterConversionJob(conversionJob);
+
+            // Navigate to the wanted view.
+            INavigationService navigationService = Ioc.Default.GetRequiredService<INavigationService>();
+            navigationService.Show(Pages.Main);
+
+            conversionService.ConversionJobsTerminated += this.ConversionService_ConversionJobsTerminated;
+            //conversionService.Conver();
+            conversionService.ConvertFilesAsync();
+
+        }
+
     }
 }

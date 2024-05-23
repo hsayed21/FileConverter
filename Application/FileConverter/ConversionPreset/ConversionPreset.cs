@@ -22,6 +22,7 @@ namespace FileConverter
         private InputPostConversionAction inputPostConversionAction;
         private ConversionSettings settings = new ConversionSettings();
         private string outputFileNameTemplate;
+        private string hotkeyForLastDownloaded;
 
         public ConversionPreset()
         {
@@ -271,6 +272,23 @@ namespace FileConverter
                 this.OnPropertyChanged();
             }
         }
+
+
+        [XmlElement]
+        public string HotkeyForLastDownloaded
+        {
+            get
+            {
+                return this.hotkeyForLastDownloaded;
+            }
+
+            set
+            {
+                this.hotkeyForLastDownloaded = value;
+                this.OnPropertyChanged();
+            }
+        }
+
 
         public void Clean()
         {

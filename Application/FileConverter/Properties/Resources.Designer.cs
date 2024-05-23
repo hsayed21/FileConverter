@@ -781,6 +781,15 @@ namespace FileConverter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hotkey Last Downloaded: .
+        /// </summary>
+        public static string HotkeyForLastDownloaded {
+            get {
+                return ResourceManager.GetString("HotkeyForLastDownloaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Import.
         /// </summary>
         public static string ImportPresets {
