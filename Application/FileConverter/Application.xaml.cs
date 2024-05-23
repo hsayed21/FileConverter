@@ -584,21 +584,15 @@ namespace FileConverter
 
             IConversionService conversionService = Ioc.Default.GetRequiredService<IConversionService>();
 
-            //foreach (string mp4File in mp4Files)
-            //{
-            //    ConversionJob conversionJob = ConversionJobFactory.Create(conversionPreset, mp4File);
-            //    conversionService.RegisterConversionJob(conversionJob);
-            //}
-
             ConversionJob conversionJob = ConversionJobFactory.Create(conversionPreset, lastFile.FullName);
             conversionService.RegisterConversionJob(conversionJob);
 
             // Navigate to the wanted view.
             INavigationService navigationService = Ioc.Default.GetRequiredService<INavigationService>();
             navigationService.Show(Pages.Main);
-
+            // bring the window to the front
+            Application.Current?.MainWindow?.Activate();
             conversionService.ConversionJobsTerminated += this.ConversionService_ConversionJobsTerminated;
-            //conversionService.Conver();
             conversionService.ConvertFilesAsync();
 
         }

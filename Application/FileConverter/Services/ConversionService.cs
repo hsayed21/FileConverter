@@ -91,6 +91,7 @@ namespace FileConverter.Services
 
                 if (allJobAreFinished)
                 {
+                    conversionJobs.Clear();
                     break;
                 }
 
@@ -129,7 +130,9 @@ namespace FileConverter.Services
                             files.Add(conversionJob.OutputFilePath);
                         }
 
+                        conversionJobs.RemoveAt(jobIndex);
                         break;
+
                     }
                 }
 
